@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d057391bce04432f8a65e16290c392a2, type: 3}
+  m_Name: FreightlinerCascadia_Modern
+  m_EditorClassIdentifier: Assembly-CSharp::CDL.AirBrakeSimulator.TruckCabinConfig
+  truckName: Freightliner Cascadia
+  truckSubtitle: Modern Aerodynamic Highway (Digital & Carbon Fiber)
+  dashboardBackground: {fileID: 21300000, guid: bf19b832b6514fc4819689eeca8ec7dd, type: 3}
+  primaryGaugeDial: {fileID: 21300000, guid: ff51662d5cd044b3a47cdac1e7b0d157, type: 3}
+  secondaryGaugeDial: {fileID: 21300000, guid: ff51662d5cd044b3a47cdac1e7b0d157, type: 3}
+  needleSprite: {fileID: 21300000, guid: ea9f959fd8bb48e9a8750b91d0ac4790, type: 3}
+  needleColor: {r: 0.1, g: 0.85, b: 1, a: 1}
+  yellowKnobPushed: {fileID: 21300000, guid: 729c792df6a44b2cb52f365a3ed3c60a, type: 3}
+  yellowKnobPopped: {fileID: 21300000, guid: c88fdac096054472901add09868f4846, type: 3}
+  redKnobPushed: {fileID: 21300000, guid: e456486ee1784bdb8f69e787193e50e4, type: 3}
+  redKnobPopped: {fileID: 21300000, guid: be4fc8ec8afc49e59ff07994e112d12f, type: 3}
+  warningLightColor: {r: 1, g: 0.35, b: 0.05, a: 1}
+  lowAirBuzzerSound: {fileID: 0}
+  accentColor: {r: 0.2, g: 0.8, b: 1, a: 1}
+  headerColor: {r: 0.1, g: 0.13, b: 0.18, a: 1}
