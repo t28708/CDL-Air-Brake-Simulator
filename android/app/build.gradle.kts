@@ -7,20 +7,25 @@ plugins {
 android {
     namespace = "com.drive.cdlairbrakesimulator"
     compileSdk = 36
+    ndkVersion = "27.2.12479018"
 
     defaultConfig {
         applicationId = "com.drive.cdlairbrakesimulator"
         minSdk = 26
         targetSdk = 36
-        versionCode = 4
-        versionName = "4"
+        versionCode = 5
+        versionName = "5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            ndk {
+                debugSymbolLevel = "FULL"
+            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
