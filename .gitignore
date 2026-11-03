@@ -27,3 +27,14 @@
 # OS Generated
 .DS_Store
 Thumbs.db
+
+# Android / Gradle / Keystores
+*.keystore
+*.jks
+local.properties
+.gradle/
+.kotlin/
+android/.gradle/
+android/.kotlin/
+android/app/build/
+android/build/

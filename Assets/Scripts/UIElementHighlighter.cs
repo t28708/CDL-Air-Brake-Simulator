@@ -27,13 +27,13 @@ namespace CDL.AirBrakeSimulator
         [SerializeField] private Text pointerArrowText;
 
         [Header("Animation Settings")]
-        [SerializeField] private Color glowColor = new Color(0.98f, 0.82f, 0.15f, 1f); // Vibrant gold
-        [SerializeField] private Color boostColor = new Color(1f, 1f, 1f, 1f);         // Bright flash
-        [SerializeField] private float pulseSpeed = 4f;
-        [SerializeField] private float minAlpha = 0.3f;
+        [SerializeField] private Color glowColor = new Color(0.98f, 0.80f, 0.08f, 1f); // Bright Amber (#FACC15)
+        [SerializeField] private Color boostColor = new Color(0.0f, 0.90f, 1.0f, 1f);  // Bright Cyan (#00E5FF)
+        [SerializeField] private float pulseSpeed = 15.70796f; // 2.5 Hz (2.5 * 2 * PI rad/s)
+        [SerializeField] private float minAlpha = 0.35f;
         [SerializeField] private float maxAlpha = 1.0f;
         [SerializeField] private float minScale = 1.0f;
-        [SerializeField] private float maxScale = 1.07f;
+        [SerializeField] private float maxScale = 1.03f;
 
         private RectTransform rectTransform;
         private Vector3 initialScale = Vector3.one;
