@@ -29,6 +29,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -38,6 +40,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -170,15 +173,20 @@ fun CDLAirBrakeScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF101418))
-            .navigationBarsPadding()
+            .background(Color(0xFF0A0D12))
+            .navigationBarsPadding(),
+        contentAlignment = Alignment.Center
     ) {
-        // STRICT SINGLE-SCREEN PRIMARY UI inside Safe Area (Zero verticalScroll, zero nav-bar bleed)
+        // STRICT SINGLE-SCREEN PRIMARY UI inside Safe Area & Aspect-Constrained Container
+        // Prevents horizontal stretching/flattening on wide 4:3 & 16:10 tablets while fitting 16:9 & 20:9 phones
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .widthIn(max = 520.dp)
+                .fillMaxWidth()
+                .fillMaxHeight()
+                .background(Color(0xFF101418))
                 .padding(horizontal = 10.dp)
-                .padding(top = 4.dp, bottom = 8.dp),
+                .padding(top = 4.dp, bottom = 10.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -462,11 +470,11 @@ fun ConsolidatedControlsZone(
                     .padding(horizontal = 8.dp, vertical = 6.dp),
                 contentAlignment = Alignment.Center
             ) {
-                // Adaptive knob size so compact 16:9 phones, tall 20:9 phones, and expanded drawers never clip
+                // Adaptive 1:1 knob size so compact 16:9 phones, tall 20:9 phones, and wide tablets never clip or stretch
                 val availableH = maxHeight
-                val knobSize = (availableH * 0.52f).coerceIn(82.dp, 128.dp)
+                val knobSize = (availableH * 0.50f).coerceIn(84.dp, 126.dp)
 
-                // Self-contained Bendix MV-3 Dash Valve Module Card (Anchor: Middle-Center, max 460dp x 260dp)
+                // Self-contained Bendix MV-3 Dash Valve Module Card (Anchor: Middle-Center, tightly wrapped around columns)
                 MV3ModulePanel(
                     physics = physics,
                     dmvState = dmvState,
@@ -624,7 +632,7 @@ fun MV3ModulePanel(
     Box(
         modifier = Modifier
             .widthIn(max = 460.dp)
-            .heightIn(max = 260.dp)
+            .wrapContentHeight()
             .fillMaxWidth()
             .shadow(10.dp, RoundedCornerShape(14.dp))
             .clip(RoundedCornerShape(14.dp))
@@ -633,12 +641,11 @@ fun MV3ModulePanel(
                     colors = listOf(Color(0xFF28313E), Color(0xFF1E2530), Color(0xFF171D26))
                 )
             )
-            .border(1.5.dp, Color(0xFF334155), RoundedCornerShape(14.dp))
-            .padding(horizontal = 10.dp, vertical = 8.dp),
+            .border(1.5.dp, Color(0xFF334155), RoundedCornerShape(14.dp)),
         contentAlignment = Alignment.Center
     ) {
-        // Inner recessed dark metallic faceplate + 4 Corner Screw Accents
-        Canvas(modifier = Modifier.fillMaxSize()) {
+        // Inner recessed dark metallic faceplate + 4 Corner Screw Accents (matchParentSize prevents forcing vertical expansion)
+        Canvas(modifier = Modifier.matchParentSize()) {
             val inset = 4.dp.toPx()
             drawRoundRect(
                 color = Color(0xFF1B222C),
@@ -655,7 +662,7 @@ fun MV3ModulePanel(
             )
 
             // 4 Corner Metallic Screw Accents
-            val screwOffset = 11.dp.toPx()
+            val screwOffset = 12.dp.toPx()
             val screwRadius = 4.5.dp.toPx()
             val corners = listOf(
                 Offset(screwOffset, screwOffset),
@@ -700,9 +707,9 @@ fun MV3ModulePanel(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 4.dp, vertical = 2.dp),
+                .padding(horizontal = 12.dp, vertical = 10.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterVertically)
+            verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically)
         ) {
             // Top Beveled Nameplate Header
             Box(
@@ -726,7 +733,7 @@ fun MV3ModulePanel(
             // HorizontalLayoutGroup: LeftValveColumn (Yellow) & RightValveColumn (Red)
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
+                horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val isYellowHighlighted =
@@ -882,9 +889,11 @@ fun TactileYellowDiamondKnob(
             )
         }
 
-        // b) 3D-styled Yellow Diamond Valve Button
+        // b) 3D-styled Yellow Diamond Valve Button (locked 1:1 aspect ratio, non-stretchable)
         Box(
-            modifier = Modifier.size(knobSize),
+            modifier = Modifier
+                .size(knobSize)
+                .aspectRatio(1f),
             contentAlignment = Alignment.Center
         ) {
             Canvas(modifier = Modifier.fillMaxSize()) {
@@ -1206,9 +1215,11 @@ fun TactileRedOctagonKnob(
             )
         }
 
-        // b) 3D-styled Red Octagon Valve Button
+        // b) 3D-styled Red Octagon Valve Button (locked 1:1 aspect ratio, non-stretchable)
         Box(
-            modifier = Modifier.size(knobSize),
+            modifier = Modifier
+                .size(knobSize)
+                .aspectRatio(1f),
             contentAlignment = Alignment.Center
         ) {
             Canvas(modifier = Modifier.fillMaxSize()) {

@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -103,7 +104,9 @@ fun DualGaugesSection(
                 CascadiaRpmGauge(
                     rpm = physics.rpm.toFloat(),
                     ignition = physics.ignition,
-                    modifier = Modifier.size(gaugeDiameter)
+                    modifier = Modifier
+                        .size(gaugeDiameter)
+                        .aspectRatio(1f)
                 )
 
                 // Upgraded Center "DID" (Driver Information Display) Digital Cockpit Screen
@@ -124,7 +127,9 @@ fun DualGaugesSection(
                     secondaryPsi = physics.secondaryPsi,
                     isLowAir = (physics.primaryPsi <= 60f || physics.secondaryPsi <= 60f) &&
                             (physics.ignition != IgnitionState.OFF),
-                    modifier = Modifier.size(gaugeDiameter)
+                    modifier = Modifier
+                        .size(gaugeDiameter)
+                        .aspectRatio(1f)
                 )
             }
         }
@@ -148,6 +153,7 @@ fun CascadiaRpmGauge(
 
     Box(
         modifier = modifier
+            .aspectRatio(1f)
             .shadow(6.dp, CircleShape)
             .clip(CircleShape)
             .background(Color(0xFF0C0E12)),
@@ -353,6 +359,7 @@ fun CascadiaDualAirGauge(
 
     Box(
         modifier = modifier
+            .aspectRatio(1f)
             .shadow(6.dp, CircleShape)
             .clip(CircleShape)
             .background(Color(0xFF0C0E12)),

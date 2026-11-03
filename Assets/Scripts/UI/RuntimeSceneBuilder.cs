@@ -25,7 +25,7 @@ namespace CDL.AirBrakeSimulator
             if (canvas != null)
             {
                 Transform bg = canvas.transform.Find("Background");
-                if (bg != null && bg.Find("Layout_V8_CleanCockpitErgonomics") != null)
+                if (bg != null && bg.Find("Layout_V9_AspectRatioCockpit") != null)
                 {
                     return;
                 }
@@ -53,7 +53,7 @@ namespace CDL.AirBrakeSimulator
             if (canvas != null)
             {
                 Transform bg = canvas.transform.Find("Background");
-                if (bg != null && bg.Find("Layout_V8_CleanCockpitErgonomics") != null)
+                if (bg != null && bg.Find("Layout_V9_AspectRatioCockpit") != null)
                 {
                     return;
                 }
@@ -82,7 +82,7 @@ namespace CDL.AirBrakeSimulator
             if (canvas != null)
             {
                 Transform bg = canvas.transform.Find("Background");
-                if (bg != null && bg.Find("Layout_V8_CleanCockpitErgonomics") != null)
+                if (bg != null && bg.Find("Layout_V9_AspectRatioCockpit") != null)
                 {
                     return;
                 }
@@ -138,12 +138,20 @@ namespace CDL.AirBrakeSimulator
 
             Font defaultFont = GetDefaultFont();
 
-            // Root Skinnable Background
+            // Full-Screen Dark Backdrop behind aspect-fitted cockpit container
+            GameObject backdropGO = CreateUIPanel(canvasGO.transform, "CanvasBackdrop", new Color(0.04f, 0.05f, 0.07f, 1f));
+            SetStretch(backdropGO.GetComponent<RectTransform>());
+
+            // Root Skinnable Dashboard Container with AspectRatioFitter (prevents horizontal/vertical stretching on 4:3 tablets & 20:9 phones)
             GameObject bgGO = CreateUIPanel(canvasGO.transform, "Background", new Color(0.08f, 0.09f, 0.11f, 1f));
             SetStretch(bgGO.GetComponent<RectTransform>());
+            AspectRatioFitter bgAspectFitter = bgGO.AddComponent<AspectRatioFitter>();
+            bgAspectFitter.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
+            bgAspectFitter.aspectRatio = 1080f / 1920f;
+
             Image imgDashboardBackground = bgGO.GetComponent<Image>();
             if (truckPresets.Count > 0) imgDashboardBackground.sprite = truckPresets[0].dashboardBackground;
-            CreateUIPanel(bgGO.transform, "Layout_V8_CleanCockpitErgonomics", Color.clear);
+            CreateUIPanel(bgGO.transform, "Layout_V9_AspectRatioCockpit", Color.clear);
 
             // 0. Top Safe Area Padding for mobile notches/cameras (Height: 90px, y = 0 to 90)
             GameObject safeTopGO = CreateUIPanel(bgGO.transform, "0_TopSafeAreaFiller", new Color(0.06f, 0.07f, 0.09f, 1f));
@@ -272,15 +280,15 @@ namespace CDL.AirBrakeSimulator
             Text txtValvesHeader = CreateUIText(mv3PanelGO.transform, "ValvesHeader", "BENDIX MV-3 DASH VALVE MODULE", 15, FontStyle.Bold, new Color(0.58f, 0.64f, 0.72f), TextAnchor.MiddleCenter, defaultFont);
             SetRect(txtValvesHeader.rectTransform, 0f, 114f, 440f, 24f);
 
-            // HorizontalLayoutGroup holding LeftValveColumn & RightValveColumn
+            // HorizontalLayoutGroup holding LeftValveColumn & RightValveColumn with fixed spacing
             GameObject columnsRowGO = CreateUIPanel(mv3PanelGO.transform, "ValveColumnsRow", Color.clear);
-            SetRect(columnsRowGO.GetComponent<RectTransform>(), 0f, -6f, 860f, 236f);
+            SetRect(columnsRowGO.GetComponent<RectTransform>(), 0f, -6f, 860f, 244f);
             HorizontalLayoutGroup hlg = columnsRowGO.AddComponent<HorizontalLayoutGroup>();
             hlg.childAlignment = TextAnchor.MiddleCenter;
-            hlg.spacing = 40f;
+            hlg.spacing = 48f;
             hlg.childControlWidth = true;
             hlg.childControlHeight = true;
-            hlg.childForceExpandWidth = true;
+            hlg.childForceExpandWidth = false;
             hlg.childForceExpandHeight = false;
 
             Sprite initYellow = truckPresets.Count > 0 ? truckPresets[0].yellowKnobPopped : null;
@@ -360,9 +368,10 @@ namespace CDL.AirBrakeSimulator
             // =========================================================================
             // 5. DMV EXAMINER BOTTOM SHEET (Anchored above 56px minimum safe bottom margin)
             // =========================================================================
-            float safeBottomMargin = Mathf.Max(56f, Screen.safeArea.yMin);
+            float safeBottomPixels = Screen.height > 0 ? Screen.safeArea.yMin * (1920f / Screen.height) : 0f;
+            float safeBottomMargin = Mathf.Clamp(Mathf.Max(56f, safeBottomPixels), 56f, 120f);
             GameObject dialogCardGO = CreateUIPanel(bgGO.transform, "5_ExaminerCardSection", new Color(0.09f, 0.11f, 0.15f, 0.98f));
-            SetAnchorBottom(dialogCardGO.GetComponent<RectTransform>(), safeBottomMargin, 455f, 0f);
+            SetAnchorBottom(dialogCardGO.GetComponent<RectTransform>(), safeBottomMargin, 410f, 0f);
 
             // Compact Minimized Bar at the bottom (Height: 70px, above safeBottomMargin)
             GameObject minBarGO = CreateUIPanel(bgGO.transform, "ExaminerMinimizedBar", new Color(0.09f, 0.11f, 0.15f, 0.98f));
@@ -745,6 +754,20 @@ namespace CDL.AirBrakeSimulator
             SetRect(dialGO.GetComponent<RectTransform>(), 0f, 0f, 370f, 370f);
             dialImg = dialGO.GetComponent<Image>();
             dialImg.sprite = dialSprite;
+            dialImg.preserveAspect = true;
+            AspectRatioFitter dialFitter = dialGO.AddComponent<AspectRatioFitter>();
+            dialFitter.aspectMode = AspectRatioFitter.AspectMode.HeightControlsWidth;
+            dialFitter.aspectRatio = 1f;
+
+            // Scale numbers on dial face (with "100" and "PSI" slightly offset so vertical needles at ~90-100 PSI never obscure them)
+            Text lbl50 = CreateUIText(dialGO.transform, "Scale50", "50", 16, FontStyle.Bold, new Color(0.92f, 0.95f, 0.98f), TextAnchor.MiddleCenter, font);
+            SetRect(lbl50.rectTransform, -96f, 44f, 44f, 24f);
+            Text lbl100 = CreateUIText(dialGO.transform, "Scale100", "100", 16, FontStyle.Bold, new Color(0.92f, 0.95f, 0.98f), TextAnchor.MiddleCenter, font);
+            SetRect(lbl100.rectTransform, 58f, 92f, 48f, 24f); // Offset slightly right from 12 o'clock vertical needle path
+            Text lbl150 = CreateUIText(dialGO.transform, "Scale150", "150", 16, FontStyle.Bold, new Color(0.92f, 0.95f, 0.98f), TextAnchor.MiddleCenter, font);
+            SetRect(lbl150.rectTransform, 92f, -68f, 48f, 24f);
+            Text lblPsiUnit = CreateUIText(dialGO.transform, "ScalePSIUnit", "AIR • PSI", 13, FontStyle.Bold, new Color(0.68f, 0.76f, 0.85f), TextAnchor.MiddleCenter, font);
+            SetRect(lblPsiUnit.rectTransform, 0f, -28f, 90f, 20f); // Offset below center pivot cap
 
             GameObject needleGO = CreateUIPanel(gaugeRoot.transform, "Needle", Color.white);
             needleRect = needleGO.GetComponent<RectTransform>();
@@ -752,10 +775,12 @@ namespace CDL.AirBrakeSimulator
             SetRect(needleRect, 0f, 0f, 26f, 185f);
             needleImg = needleGO.GetComponent<Image>();
             needleImg.sprite = needleSprite;
+            needleImg.preserveAspect = true;
 
             // Center Pivot Cap sitting strictly on top of needles in sorting order
             GameObject pivotCapGO = CreateUIPanel(gaugeRoot.transform, "CenterPivotCap", new Color(0.16f, 0.19f, 0.24f, 1f));
             SetRect(pivotCapGO.GetComponent<RectTransform>(), 0f, 0f, 30f, 30f);
+            pivotCapGO.transform.SetAsLastSibling();
 
             // Digital PSI Readout cleanly embedded in lower center of dial (y = -68f)
             GameObject readoutBox = CreateUIPanel(gaugeRoot.transform, "ReadoutBox", new Color(0.05f, 0.07f, 0.10f, 0.92f));
@@ -778,34 +803,64 @@ namespace CDL.AirBrakeSimulator
             out Button btn, out RectTransform knobRect, out Text txtStatus, out Image knobImg)
         {
             GameObject root = CreateUIPanel(parent, name, Color.clear);
-            SetRect(root.GetComponent<RectTransform>(), posX, posY, 390f, 236f);
+            SetRect(root.GetComponent<RectTransform>(), posX, posY, 380f, 252f);
+
+            LayoutElement colLayout = root.AddComponent<LayoutElement>();
+            colLayout.preferredWidth = 380f;
+            colLayout.preferredHeight = 252f;
+            colLayout.minWidth = 320f;
+            colLayout.minHeight = 252f;
+            colLayout.flexibleWidth = 0f;
+            colLayout.flexibleHeight = 0f;
 
             VerticalLayoutGroup vlg = root.AddComponent<VerticalLayoutGroup>();
             vlg.childAlignment = TextAnchor.MiddleCenter;
-            vlg.spacing = 16f;
-            vlg.childControlWidth = false;
-            vlg.childControlHeight = false;
+            vlg.spacing = 12f;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = true;
             vlg.childForceExpandWidth = false;
             vlg.childForceExpandHeight = false;
 
             // a) Top Label Pill
             GameObject titlePillGO = CreateUIPanel(root.transform, "TopLabelPill", new Color(0.08f, 0.10f, 0.14f, 0.96f));
             SetRect(titlePillGO.GetComponent<RectTransform>(), 0f, 92f, 320f, 28f);
+            LayoutElement topPillLayout = titlePillGO.AddComponent<LayoutElement>();
+            topPillLayout.preferredWidth = 320f;
+            topPillLayout.preferredHeight = 28f;
+            topPillLayout.minWidth = 260f;
+            topPillLayout.minHeight = 28f;
+            topPillLayout.flexibleWidth = 0f;
+            topPillLayout.flexibleHeight = 0f;
             Text txtTitle = CreateUIText(titlePillGO.transform, "Title", title, 16, FontStyle.Bold, new Color(0.95f, 0.85f, 0.35f), TextAnchor.MiddleCenter, font);
             SetStretch(txtTitle.rectTransform, 2f);
 
-            // b) 3D-styled Octagon/Diamond Valve Button (180x180 px target size)
+            // b) 3D-styled Octagon/Diamond Valve Button (LayoutElement forced exact 180x180 px, non-stretchable, preserveAspect = true)
             GameObject knobGO = CreateUIPanel(root.transform, "KnobButton", Color.white);
             knobRect = knobGO.GetComponent<RectTransform>();
             SetRect(knobRect, 0f, 0f, 180f, 180f);
+            LayoutElement knobLayout = knobGO.AddComponent<LayoutElement>();
+            knobLayout.preferredWidth = 180f;
+            knobLayout.preferredHeight = 180f;
+            knobLayout.minWidth = 180f;
+            knobLayout.minHeight = 180f;
+            knobLayout.flexibleWidth = 0f;
+            knobLayout.flexibleHeight = 0f;
 
             knobImg = knobGO.GetComponent<Image>();
             knobImg.sprite = knobSprite;
+            knobImg.preserveAspect = true;
             btn = knobGO.AddComponent<Button>();
 
             // c) Bottom Status Badge
             GameObject statusPillGO = CreateUIPanel(root.transform, "BottomStatusBadge", new Color(0.06f, 0.08f, 0.12f, 0.96f));
             SetRect(statusPillGO.GetComponent<RectTransform>(), 0f, -92f, 320f, 28f);
+            LayoutElement botPillLayout = statusPillGO.AddComponent<LayoutElement>();
+            botPillLayout.preferredWidth = 320f;
+            botPillLayout.preferredHeight = 28f;
+            botPillLayout.minWidth = 260f;
+            botPillLayout.minHeight = 28f;
+            botPillLayout.flexibleWidth = 0f;
+            botPillLayout.flexibleHeight = 0f;
             txtStatus = CreateUIText(statusPillGO.transform, "Status", defaultStatus, 15, FontStyle.Bold, new Color(0.95f, 0.35f, 0.35f), TextAnchor.MiddleCenter, font);
             SetStretch(txtStatus.rectTransform, 2f);
         }

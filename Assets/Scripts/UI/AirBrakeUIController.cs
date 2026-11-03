@@ -132,9 +132,9 @@ namespace CDL.AirBrakeSimulator
             HideAllModalsInScene();
 
             Transform bg = transform.Find("Background");
-            if (bg != null && bg.Find("Layout_V8_CleanCockpitErgonomics") == null)
+            if (bg != null && bg.Find("Layout_V9_AspectRatioCockpit") == null)
             {
-                Debug.Log("<color=#38bdf8><b>[CDL Air Brake] Upgrading canvas to Layout_V8_CleanCockpitErgonomics...</b></color>");
+                Debug.Log("<color=#38bdf8><b>[CDL Air Brake] Upgrading canvas to Layout_V9_AspectRatioCockpit...</b></color>");
                 GameObject builderGO = new GameObject("RuntimeSceneAutoBuilder");
                 RuntimeSceneBuilder builder = builderGO.AddComponent<RuntimeSceneBuilder>();
                 builder.BuildRuntimeUI();
@@ -225,9 +225,9 @@ namespace CDL.AirBrakeSimulator
 
         private void Update()
         {
-            if (transform != null && transform.Find("Background/Layout_V8_CleanCockpitErgonomics") == null)
+            if (transform != null && transform.Find("Background/Layout_V9_AspectRatioCockpit") == null)
             {
-                Debug.Log("<color=#38bdf8><b>[CDL Air Brake] Upgrading canvas to Layout_V8_CleanCockpitErgonomics in Update()...</b></color>");
+                Debug.Log("<color=#38bdf8><b>[CDL Air Brake] Upgrading canvas to Layout_V9_AspectRatioCockpit in Update()...</b></color>");
                 GameObject builderGO = new GameObject("RuntimeSceneAutoBuilder");
                 RuntimeSceneBuilder builder = builderGO.AddComponent<RuntimeSceneBuilder>();
                 builder.BuildRuntimeUI();
@@ -829,23 +829,23 @@ namespace CDL.AirBrakeSimulator
                 if (yellowKnobTransform != null)
                 {
                     // Pushed in: slightly scale down and shift in (pressed state)
-                    yellowKnobTransform.localScale = pushedIn ? new Vector3(0.90f, 0.90f, 1f) : Vector3.one;
+                    yellowKnobTransform.localScale = pushedIn ? new Vector3(0.92f, 0.92f, 1f) : Vector3.one;
                 }
                 if (txtYellowStatus != null)
                 {
-                    txtYellowStatus.text = pushedIn ? "PUSHED IN (CHARGED)" : "POPPED OUT (APPLIED)";
-                    txtYellowStatus.color = pushedIn ? valvePushedColor : valvePoppedColor;
+                    txtYellowStatus.text = pushedIn ? "PUSHED IN • RELEASED" : "PULLED OUT • PARKED";
+                    txtYellowStatus.color = pushedIn ? valvePushedColor : new Color(0.98f, 0.75f, 0.15f);
                 }
             }
             else if (valve == ValveType.TrailerRed)
             {
                 if (redKnobTransform != null)
                 {
-                    redKnobTransform.localScale = pushedIn ? new Vector3(0.90f, 0.90f, 1f) : Vector3.one;
+                    redKnobTransform.localScale = pushedIn ? new Vector3(0.92f, 0.92f, 1f) : Vector3.one;
                 }
                 if (txtRedStatus != null)
                 {
-                    txtRedStatus.text = pushedIn ? "PUSHED IN (SUPPLIED)" : "POPPED OUT (EMERGENCY)";
+                    txtRedStatus.text = pushedIn ? "PUSHED IN • SUPPLY ON" : "PULLED OUT • EVACUATED";
                     txtRedStatus.color = pushedIn ? valvePushedColor : valvePoppedColor;
                 }
             }
@@ -853,26 +853,54 @@ namespace CDL.AirBrakeSimulator
 
         private void HandleLowAirWarningChanged(bool isActive)
         {
-            if (warningPanel != null)
+            if (warningPanel != null && !warningPanel.activeSelf)
             {
-                warningPanel.SetActive(isActive);
+                warningPanel.SetActive(true);
             }
         }
 
         private void UpdateWarningAnnunciatorFlash()
         {
-            if (airSystem != null && airSystem.IsLowAirWarningActive && warningPanel != null && warningPanel.activeSelf)
+            if (warningPanel != null && !warningPanel.activeSelf)
+            {
+                warningPanel.SetActive(true);
+            }
+
+            if (airSystem != null && airSystem.IsLowAirWarningActive)
             {
                 warningFlashTimer += Time.deltaTime * 4f;
                 float flash = Mathf.PingPong(warningFlashTimer, 1f);
 
                 if (warningIcon != null)
                 {
-                    warningIcon.color = Color.Lerp(Color.red, Color.yellow, flash);
+                    warningIcon.color = Color.Lerp(new Color(0.65f, 0.08f, 0.08f, 0.98f), new Color(0.95f, 0.22f, 0.15f, 0.98f), flash);
                 }
                 if (warningText != null)
                 {
-                    warningText.color = Color.Lerp(Color.white, Color.red, flash);
+                    warningText.text = "⚠ LOW AIR ALARM\nAIR SYSTEM: CRITICAL\n(<60 PSI ACTIVE)";
+                    warningText.color = Color.Lerp(Color.white, new Color(1.0f, 0.92f, 0.23f), flash);
+                }
+            }
+            else
+            {
+                if (warningIcon != null)
+                {
+                    warningIcon.color = new Color(0.06f, 0.10f, 0.16f, 0.98f);
+                }
+                if (warningText != null)
+                {
+                    float lowest = airSystem != null ? Mathf.Min(airSystem.PrimaryPSI, airSystem.SecondaryPSI) : 120f;
+                    bool isPowered = airSystem != null && airSystem.CurrentIgnition != IgnitionState.OFF;
+                    if (!isPowered)
+                    {
+                        warningText.text = "DID • COCKPIT\nAIR SYSTEM: STANDBY\n(KEY OFF)";
+                        warningText.color = new Color(0.58f, 0.64f, 0.72f);
+                    }
+                    else
+                    {
+                        warningText.text = $"DID • COCKPIT\nAIR SYSTEM: NORMAL\n({lowest:F0} PSI OK)";
+                        warningText.color = new Color(0.0f, 0.90f, 0.46f);
+                    }
                 }
             }
         }
